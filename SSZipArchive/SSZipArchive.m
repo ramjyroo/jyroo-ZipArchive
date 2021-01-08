@@ -760,17 +760,22 @@ BOOL _fileIsSymbolicLink(const unz_file_info *fileInfo);
     return [SSZipArchive createZipFileAtPath:path withContentsOfDirectory:directoryPath keepParentDirectory:keepParentDirectory withPassword:nil];
 }
 
-+ (BOOL)createZipFileAtPath:(NSString *)path withFilesAtPaths:(NSArray<NSString *> *)paths withPassword:(NSString *)password
++ (BOOL)createZipFileAtPath:(NSString *)path withFilesAtPaths:(NSArray<NSString *> *)paths withPassword:(nullable NSString *)password AES:(BOOL)aes
 {
     SSZipArchive *zipArchive = [[SSZipArchive alloc] initWithPath:path];
     BOOL success = [zipArchive open];
     if (success) {
         for (NSString *filePath in paths) {
-            success &= [zipArchive writeFile:filePath withPassword:password];
+            success &= [zipArchive writeFile:filePath withPassword:password AES:aes];
         }
         success &= [zipArchive close];
     }
     return success;
+}
+
++ (BOOL)createZipFileAtPath:(NSString *)path withFilesAtPaths:(NSArray<NSString *> *)paths withPassword:(NSString *)password
+{
+    return [SSZipArchive createZipFileAtPath:path withFilesAtPaths:paths withPassword:password AES:YES];
 }
 
 + (BOOL)createZipFileAtPath:(NSString *)path withContentsOfDirectory:(NSString *)directoryPath withPassword:(nullable NSString *)password {
@@ -817,11 +822,7 @@ BOOL _fileIsSymbolicLink(const unz_file_info *fileInfo);
         }
         for (__strong NSString *fileName in allObjects) {
             NSString *fullFilePath = [directoryPath stringByAppendingPathComponent:fileName];
-            if ([fullFilePath isEqualToString:path]) {
-                NSLog(@"[SSZipArchive] the archive path and the file path: %@ are the same, which is forbidden.", fullFilePath);
-                continue;
-            }
-			
+            
             if (keepParentDirectory) {
                 fileName = [directoryPath.lastPathComponent stringByAppendingPathComponent:fileName];
             }
@@ -886,6 +887,11 @@ BOOL _fileIsSymbolicLink(const unz_file_info *fileInfo);
 - (BOOL)writeFile:(NSString *)path withPassword:(nullable NSString *)password
 {
     return [self writeFileAtPath:path withFileName:nil withPassword:password];
+}
+
+- (BOOL)writeFile:(NSString *)path withPassword:(nullable NSString *)password AES:(BOOL)aes
+{
+    return [self writeFileAtPath:path withFileName:nil compressionLevel:Z_DEFAULT_COMPRESSION password:password AES:aes];
 }
 
 - (BOOL)writeFileAtPath:(NSString *)path withFileName:(nullable NSString *)fileName withPassword:(nullable NSString *)password
@@ -1140,9 +1146,9 @@ int _zipOpenEntry(zipFile entry, NSString *name, const zip_fileinfo *zipfi, int 
     uint16_t made_on_darwin = 19 << 8;
     //MZ_ZIP_FLAG_UTF8
     uint16_t flag_base = 1 << 11;
-    return zipOpenNewFileInZip5(entry, name.fileSystemRepresentation, zipfi, NULL, 0, NULL, 0, NULL, Z_DEFLATED, level, 0, -MAX_WBITS, DEF_MEM_LEVEL, Z_DEFAULT_STRATEGY, password.UTF8String, aes, made_on_darwin, flag_base, 1);
+    return zipOpenNewFileInZip5(entry, name.fileSystemRepresentation, zipfi, NULL, 0, NULL, 0, NULL, Z_DEFLATED, level, 0, -MAX_WBITS, DEF_MEM_LEVEL, Z_DEFAULT_STRATEGY, password.UTF8String, aes, made_on_darwin, flag_base, 0);
 }
-
+  
 #pragma mark - Private tools for file info
 
 BOOL _fileIsSymbolicLink(const unz_file_info *fileInfo)

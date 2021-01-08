@@ -38,6 +38,13 @@ class ViewController: UIViewController {
         print("Sample path:", samplePath!)
         
         resetPressed(resetButton)
+        let randomString = "test"
+        let fileName = "test"
+        let fmgr = FileManager.default
+        let tempDir = fmgr.temporaryDirectory
+        let zipFileName = "\(fileName).zip"
+        let zipFile = tempDir.appendingPathComponent(zipFileName)
+        SSZipArchive.createZipFile(atPath: zipFile.path, withFilesAtPaths: [], withPassword: randomString, aes: false)
     }
 
     // MARK: IBAction

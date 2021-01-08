@@ -10,12 +10,7 @@
 #define _SSZIPARCHIVE_H
 
 #import <Foundation/Foundation.h>
-
-#if COCOAPODS
-#import <SSZipArchive/SSZipCommon.h>
-#else
-#import <ZipArchive/SSZipCommon.h>
-#endif
+#include "SSZipCommon.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -101,6 +96,7 @@ typedef NS_ENUM(NSInteger, SSZipArchiveErrorCode) {
 // with optional password, default encryption is AES
 // don't use AES if you need compatibility with native macOS unzip and Archive Utility
 + (BOOL)createZipFileAtPath:(NSString *)path withFilesAtPaths:(NSArray<NSString *> *)paths withPassword:(nullable NSString *)password;
++ (BOOL)createZipFileAtPath:(NSString *)path withFilesAtPaths:(NSArray<NSString *> *)paths withPassword:(nullable NSString *)password AES:(BOOL)aes;
 + (BOOL)createZipFileAtPath:(NSString *)path withContentsOfDirectory:(NSString *)directoryPath withPassword:(nullable NSString *)password;
 + (BOOL)createZipFileAtPath:(NSString *)path withContentsOfDirectory:(NSString *)directoryPath keepParentDirectory:(BOOL)keepParentDirectory withPassword:(nullable NSString *)password;
 + (BOOL)createZipFileAtPath:(NSString *)path
